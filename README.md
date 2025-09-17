@@ -31,3 +31,15 @@ A mobile app for managing water delivery operations. Dispatchers, drivers, and f
 ### Notes
 
 - Ensure Firebase project is set up and `app/google-services.json` is present for builds.
+
+---
+
+## 🔐 Security Posture
+
+- **Backups disabled**: `android:allowBackup="false"` to prevent unauthorized ADB backups.
+- **No cleartext traffic**: `android:usesCleartextTraffic="false"` in manifest.
+- **Release hardening**: Code shrinking/obfuscation and resource shrinking enabled for `release`.
+- **Least exposure**: Only the launcher activity is exported; others are `exported=false`.
+- **Secrets hygiene**: No hardcoded API keys or secrets detected; `google-services.json` is git-ignored.
+
+If you introduce WebView or network clients, ensure TLS is enforced and avoid `addJavascriptInterface` unless strictly necessary and sandboxed.

@@ -21,11 +21,18 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            // Keep debug debuggable; consider disabling cleartext at runtime via manifest already set.
+            // Enable minify off for faster dev; leave shrink off.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
     compileOptions {
