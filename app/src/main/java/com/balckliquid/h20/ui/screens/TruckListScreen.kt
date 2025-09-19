@@ -60,6 +60,8 @@ fun TruckListScreen() {
     var selectedTruck by remember { mutableStateOf<Truck?>(null) }
     var quickEditTruck by remember { mutableStateOf<Truck?>(null) }
     var isQuickEditVisible by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var truckToDelete by remember { mutableStateOf<Truck?>(null) }
     val db = FirebaseFirestore.getInstance()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -146,6 +148,10 @@ fun TruckListScreen() {
                                         selectedTruck = truck
                                         showEditDialog = true
                                     },
+                                    onDeleteClick = {
+                                        truckToDelete = truck
+                                        showDeleteConfirm = true
+                                    },
                                     onDriverClick = {
                                         quickEditTruck = truck
                                         isQuickEditVisible = true
@@ -156,6 +162,32 @@ fun TruckListScreen() {
                     }
                 }
             }
+        }
+
+        if (showDeleteConfirm && truckToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                title = { Text("Delete Truck") },
+                text = { Text("Are you sure you want to delete ${truckToDelete!!.registrationNumber}?") },
+                confirmButton = {
+                    Button(onClick = {
+                        scope.launch {
+                            deleteTruck(truckToDelete!!.id, db, context)
+                            showDeleteConfirm = false
+                            truckToDelete = null
+                        }
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false; truckToDelete = null }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
 
         if (isQuickEditVisible && quickEditTruck != null) {
@@ -209,7 +241,7 @@ fun TruckListScreen() {
 }
 
 @Composable
-private fun TruckCard(truck: Truck, onEditClick: () -> Unit, onDriverClick: () -> Unit) {
+private fun TruckCard(truck: Truck, onEditClick: () -> Unit, onDeleteClick: () -> Unit, onDriverClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -244,12 +276,21 @@ private fun TruckCard(truck: Truck, onEditClick: () -> Unit, onDriverClick: () -
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            IconButton(onClick = onEditClick) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = "Edit",
-                    tint = MaterialTheme.colorScheme.primary
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
