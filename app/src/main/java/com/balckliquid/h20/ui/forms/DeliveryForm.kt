@@ -1,22 +1,26 @@
 package com.balckliquid.h20.ui.forms
 
+import android.app.DatePickerDialog
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+//import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.balckliquid.h20.models.Delivery
 import com.google.firebase.firestore.FirebaseFirestore
-import java.util.*
-import android.app.DatePickerDialog
-import androidx.compose.foundation.clickable
 import java.text.SimpleDateFormat
+import java.util.*
+
+// remove order Id from the ui
 
 @Composable
 fun DeliveryForm(selectedTruckReg: String) {
-    var orderId by remember { mutableStateOf("") }
     var waterAmount by remember { mutableStateOf("") }
     var customerName by remember { mutableStateOf("") }
     var cost by remember { mutableStateOf("") }
@@ -61,19 +65,11 @@ fun DeliveryForm(selectedTruckReg: String) {
         Spacer(modifier = Modifier.height(8.dp))
         
         OutlinedTextField(
-            value = orderId,
-            onValueChange = { orderId = it },
-            label = { Text("Order ID") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        OutlinedTextField(
             value = waterAmount,
             onValueChange = { waterAmount = it },
             label = { Text("Water Amount (Liters)") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -91,7 +87,8 @@ fun DeliveryForm(selectedTruckReg: String) {
             value = cost,
             onValueChange = { cost = it },
             label = { Text("Cost") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -106,7 +103,6 @@ fun DeliveryForm(selectedTruckReg: String) {
                 val db = FirebaseFirestore.getInstance()
                 val delivery = Delivery(
                     id = UUID.randomUUID().toString(),
-                    orderId = orderId,
                     waterAmount = waterAmount.toDoubleOrNull() ?: 0.0,
                     customerName = customerName,
                     date = selectedDate ?: System.currentTimeMillis(),
@@ -119,7 +115,6 @@ fun DeliveryForm(selectedTruckReg: String) {
                     .set(delivery)
                     .addOnSuccessListener {
                         // Clear form
-                        orderId = ""
                         waterAmount = ""
                         customerName = ""
                         cost = ""
@@ -135,4 +130,4 @@ fun DeliveryForm(selectedTruckReg: String) {
             Text("Submit Delivery")
         }
     }
-} 
+}

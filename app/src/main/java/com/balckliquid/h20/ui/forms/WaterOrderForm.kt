@@ -19,6 +19,9 @@ import androidx.compose.foundation.clickable
 import com.balckliquid.h20.models.WaterOrder
 import java.text.SimpleDateFormat
 
+// remove the time component when entering the date
+
+
 @Composable
 fun WaterOrderForm(selectedTruckReg: String) {
     var waterAmount by remember { mutableStateOf("") }

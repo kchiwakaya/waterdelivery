@@ -127,13 +127,28 @@ fun TruckListScreen() {
                         key = { it.id }
                     ) { truck ->
                         val dismissState = rememberDismissState()
-                        if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                            scope.launch {
-                                deleteTruck(truck.id, db, context)
+                        var deleteTriggered by remember { mutableStateOf(false) }
+                        // Reset deleteTriggered when truck changes
+                        LaunchedEffect(truck.id) {
+                            deleteTriggered = false
+                        }
+                        LaunchedEffect(dismissState.currentValue) {
+                            if (
+                                dismissState.isDismissed(DismissDirection.EndToStart)
+                                && !deleteTriggered
+                            ) {
+                                deleteTriggered = true
+                                scope.launch {
+                                    deleteTruck(truck.id, db, context)
+                                }
+                            } else if (
+                                dismissState.isDismissed(DismissDirection.StartToEnd)
+                                && !deleteTriggered
+                            ) {
+                                deleteTriggered = true
+                                quickEditTruck = truck
+                                isQuickEditVisible = true
                             }
-                        } else if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
-                            quickEditTruck = truck
-                            isQuickEditVisible = true
                         }
                         SwipeToDismiss(
                             state = dismissState,
@@ -242,11 +257,9 @@ fun TruckListScreen() {
 
 @Composable
 private fun TruckCard(truck: Truck, onEditClick: () -> Unit, onDeleteClick: () -> Unit, onDriverClick: () -> Unit) {
-    Card(
+    androidx.compose.material.Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        elevation = 4.dp
     ) {
         Row(
             modifier = Modifier
@@ -469,4 +482,4 @@ private fun updateTruckDriver(truck: Truck, db: FirebaseFirestore, context: Cont
         .addOnFailureListener { e ->
             Toast.makeText(context, "Error updating driver: ${e.message}", Toast.LENGTH_LONG).show()
         }
-} 
+}
